@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { InjectConnection, TypeOrmModule } from '@nestjs/typeorm';
+import { Connection } from 'typeorm';
 
 @Module({
   imports: [
@@ -19,4 +20,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule implements OnModuleInit {
+  constructor(@InjectConnection() private readonly connection: Connection) {}
+
+  async onModuleInit() {
+    try {
+      await this.connection.query('SELECT 1');
+      console.log('Database connection successful');
+    } catch (error) {
+      console.error('Database connection failed', error);
+    }
+  }
+}
